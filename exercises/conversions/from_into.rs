@@ -40,10 +40,20 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
-
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        let parts: Vec<_> = s
+            .split(',')
+            .take(2)
+            .filter(|w| !w.trim().is_empty())
+            .collect();
+        if parts.len() >= 2 {
+            let name = parts[0].into();
+            if let Ok(age) = parts[1].parse::<usize>() {
+                return Person { name, age };
+            }
+        }
+        Person::default()
     }
 }
 
@@ -136,5 +146,12 @@ mod tests {
         let p: Person = Person::from("Mike,32,man");
         assert_eq!(p.name, "Mike");
         assert_eq!(p.age, 32);
+    }
+
+    #[test]
+    fn test_age_in_the_wrong_position() {
+        let p: Person = Person::from("Mike,,32,man");
+        assert_eq!(p.name, "John");
+        assert_eq!(p.age, 30);
     }
 }
